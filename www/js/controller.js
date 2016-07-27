@@ -1,7 +1,35 @@
-angular.module('starter.controllers', ['ionic'])
+angular.module('starter.controllers', ['ionic', 'firebase'])
 
-.controller('MapCtrl', ['$scope', function($scope) {
+.controller('MapCtrl', ['$scope', '$firebase', '$ionicPopup', function($scope, $firebase, $ionicPopup) {
+  var firebaseObject = new Firebase('https://imap-6aaee.firebaseio.com/MapDetails');
+  var fb = $firebase(firebaseObject);
 
+  $scope.user = {};
+
+  $scope.saveDetails = function() {
+    var lat = $scope.user.latitude;
+    var lgt = $scope.user.longitude;
+    var des = $scope.user.desc;
+
+    // write to Firebase
+    fb.$push({
+      latitude: lat,
+      longitude: lgt,
+      description: des
+    }).then(function(ref) {
+      $scope.user = {};
+      $scope.showAlert('Your location has been saved!');
+    }, function(error) {
+      $scope.showAlert('Error: ' + error);
+    });
+  };
+
+  $scope.showAlert = function(message) {
+    $ionicPopup.alert({
+      title: 'iMap',
+      template: message
+    });
+  }
 }])
 
 .directive('map', function() {
@@ -25,8 +53,10 @@ angular.module('starter.controllers', ['ionic'])
         draggable: true
       });
 
-      google.maps.event.addListener(marker, 'dragend', function() {
-        // do stuff
+      google.maps.event.addListener(marker, 'dragend', function(evt) {
+        scope.$parent.user.latitude = evt.latLng.lat();
+        scope.$parent.user.longitude = evt.latLng.lng();
+        scope.$apply();
       });
 
     }
