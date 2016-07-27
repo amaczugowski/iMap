@@ -18,7 +18,16 @@ angular.module('starter.controllers', ['ionic'])
         zoom: zValue,
         center: myLatlng
       },
-      map = new google.maps.Map(element[0], mapOptions);
+      map = new google.maps.Map(element[0], mapOptions),
+      marker = new google.maps.Marker({
+        position: myLatlng,
+        map: map,
+        draggable: true
+      });
+
+      google.maps.event.addListener(marker, 'dragend', function() {
+        // do stuff
+      });
 
     }
   }
